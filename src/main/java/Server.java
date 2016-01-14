@@ -1,21 +1,20 @@
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.Socket;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-
 
 public class Server {
 	private static int uniqueId = 0;
@@ -26,10 +25,9 @@ public class Server {
 	public void handleRequest(Socket connection) {
 		ClientThread clientThread = new ClientThread(connection);
 		clientThreadList.add(clientThread);
-		clientThread.start();
+//		clientThread.start();
 	}
 
-	
 	private void display(String msg) {
 		String time = dateFormat.format(new Date()) + " " + msg;
 		System.out.println(time);
@@ -74,6 +72,8 @@ public class Server {
 		String username;
 		MessageType messageType;
 		String date;
+		String httpMethod;
+		String requestUrl;
 
 		// 생성자
 		public ClientThread(Socket connection) {
@@ -82,28 +82,80 @@ public class Server {
 			/* Creating both Data Stream */
 			System.out.println("Thread trying to create Object Input/Output Streams");
 			try {
-//				// create output first
-//				sOutput = new ObjectOutputStream(connection.getOutputStream());
-//				sInput = new ObjectInputStream(connection.getInputStream());
-//				// read the username
-//				username = (String) sInput.readObject();
-//				display(username + " just connected.");
-				
-				String requestUrl = getRequestUrl(connection.getInputStream());
+				// // create output first
+				// sOutput = new
+				// ObjectOutputStream(connection.getOutputStream());
+				// sInput = new ObjectInputStream(connection.getInputStream());
+				// // read the username
+				// username = (String) sInput.readObject();
+				// display(username + " just connected.");
+				analyzeRequest(connection);
 				dos = new DataOutputStream(connection.getOutputStream());
-				
+				try {
+					logger.debug(httpMethod.toString());
+					logger.debug(requestUrl.toString());
+					if (httpMethod.equals("GET")) {
+						byte[] body;
+						body = Files.readAllBytes(new File("./WebContent/WEB-INF" + requestUrl).toPath());
+						response200Header(dos, body.length);
+						responseBody(dos, body);
+					} else if (httpMethod.equals("POST")) {
+
+					}
+				} catch (IOException e) {
+					logger.error(e.getMessage());
+				}
 			} catch (IOException e) {
 				display("Exception creating new Input/output Streams: " + e);
-				return;
 			}
 
 			date = new Date().toString() + "\n";
 		}
 
-		private String getRequestUrl(InputStream in) throws IOException {
-			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+		private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
+			try {
+				dos.writeBytes("HTTP/1.1 200 OK \r\n");
+				dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
+				dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
+				dos.writeBytes("\r\n");
+			} catch (IOException e) {
+				logger.error(e.getMessage());
+			}
+		}
+
+		private void response302Header(DataOutputStream dos, int lengthOfBodyContent) {
+			try {
+				dos.writeBytes("HTTP/1.1 200 OK \r\n");
+				dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
+				dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
+				dos.writeBytes("\r\n");
+			} catch (IOException e) {
+				logger.error(e.getMessage());
+			}
+		}
+
+		private void responseBody(DataOutputStream dos, byte[] body) {
+			try {
+				dos.write(body, 0, body.length);
+				dos.writeBytes("\r\n");
+				dos.flush();
+			} catch (IOException e) {
+				logger.error(e.getMessage());
+			}
+		}
+
+		private void analyzeRequest(Socket connection) throws IOException {
+			InputStream inputStream = connection.getInputStream();
+			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
 			String firstLine = bufferedReader.readLine();
-			return firstLine.split(" ")[1];
+
+			this.httpMethod = firstLine.split(" ")[0];
+
+			String requestUrl = firstLine.split(" ")[1];
+			if (requestUrl.equals("/")) {
+				requestUrl = "/index.html";
+			}
+			this.requestUrl = requestUrl;
 		}
 
 		// 각 클라이언트마다 개별적인 스레드를 열어서 request listen.
