@@ -8,8 +8,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
 
 import message.Message;
 
@@ -17,8 +15,7 @@ public class Server {
 	private static int uniqueId = 0;
 	private SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 	private ArrayList<ClientThread> clientThreadList = new ArrayList<ClientThread>();
-//	private static final Logger logger = LoggerFactory.getLogger(Server.class);
-	
+
 	
 	// 클라이언트로부터 연결 요청이 오면 클라이언트와 소통할 수 있는 쓰레드 생성 
 	public void createClientThread(Socket connection) {
@@ -122,14 +119,6 @@ public class Server {
 					display('\'' + username + '\'' + "의 연결이 사용자 요청에 의해 종료되었습니다");
 					break;
 				}
-//				else {
-//					sendMessage("List of the users connected at " + dateFormat.format(new Date()) + "\n");
-//					for (int i = 0; i < clientThreadList.size(); ++i) {
-//						ClientThread ct = clientThreadList.get(i);
-//						sendMessage((i + 1) + ") " + ct.username + " since " + ct.createdTime);
-//					}
-//					break;
-//				}
 			}
 			remove(id);
 			closeStreams();
@@ -141,19 +130,19 @@ public class Server {
 				if (outputStream != null)
 					outputStream.close();
 			} catch (Exception e) {
-//				logger.error("\'" + username + "\'" + "의 OutputStream을 종료하지 못했습니다.");
+				System.out.println("\'" + username + "\'" + "의 OutputStream을 종료하지 못했습니다.");
 			}
 			try {
 				if (inputStream != null)
 					inputStream.close();
 			} catch (Exception e) {
-//				logger.error("\'" + username + "\'" + "의 InputStream을 종료하지 못했습니다.");
+				System.out.println("\'" + username + "\'" + "의 InputStream을 종료하지 못했습니다.");
 			}
 			try {
 				if (connection != null)
 					connection.close();
 			} catch (Exception e) {
-//				logger.error("\'" + username + "\'" + "의 Socket을 종료하지 못했습니다.");
+				System.out.println("\'" + username + "\'" + "의 Socket을 종료하지 못했습니다.");
 			}
 		}
 
@@ -168,7 +157,7 @@ public class Server {
 				outputStream.writeObject(message);
 			} catch (IOException e) {
 				display("\'" + username + "\'" + "에게 메시지를 전송하는데 실패하였습니다");
-//				logger.error(e.getMessage());
+				System.out.println(e.getMessage());
 			}
 			return true;
 		}

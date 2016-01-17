@@ -4,15 +4,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class ClientLauncher {
 	private static final int DEFAULT_PORT = 8080;
-	private static final Logger logger = LoggerFactory.getLogger(ClientLauncher.class);
 
 	public static void main(String[] args) {
-		String serverAddress = "localhost";
+		String serverAddress = "52.192.198.85";
 		String clientName = getNameFromUser();
 		Client client = new Client(serverAddress, DEFAULT_PORT, clientName);
 		
@@ -32,7 +28,7 @@ public class ClientLauncher {
 		try {
 			return br.readLine();
 		} catch (IOException e) {
-			logger.error(e.getMessage());
+			System.out.println(e.getMessage());
 			return null;
 		}
 	}

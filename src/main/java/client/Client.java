@@ -6,9 +6,6 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.Scanner;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import message.Message;
 
 
@@ -21,8 +18,6 @@ public class Client  {
 	private ObjectInputStream inputStream;	
 	private ObjectOutputStream outputStream;	
 	private Scanner scan = new Scanner(System.in);
-	private static final Logger logger = LoggerFactory.getLogger(Client.class);
-
 	
 	
 	
@@ -70,13 +65,13 @@ public class Client  {
 	
 	
 	private static void displayError(String message) {
-		logger.error(message);      
+		System.out.println(message);      
 	}
 
 	
 	
 	private static void displaySuccess(String message) {
-		logger.info(message);      
+		System.out.println(message);      
 	}
 	
 	
